@@ -15,11 +15,22 @@ pipeline {
             }
         }
 
-        stage('Show Docker Images') {
+        stage('Remove Old Container') {
             steps {
-                sh 'docker images'
+                sh 'docker rm -f githubtest-container || true'
             }
         }
 
+        stage('Run Docker Container') {
+            steps {
+                sh 'docker run -d --name githubtest-container -p 8081:80 githubtest:v1'
+            }
+        }
+
+        stage('Verify Container') {
+            steps {
+                sh 'docker ps'
+            }
+        }
     }
 }
