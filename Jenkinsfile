@@ -2,17 +2,24 @@ pipeline {
     agent any
 
     stages {
-        stage('GitHub Pipeline') {
+
+        stage('Checkout') {
             steps {
-                echo 'Hello John from GitHub Jenkinsfile'
+                checkout scm
             }
         }
 
-        stage('Show Files') {
+        stage('Build Docker Image') {
             steps {
-                sh 'pwd'
-                sh 'ls -la'
+                sh 'docker build -t githubtest:v1 .'
             }
         }
+
+        stage('Show Docker Images') {
+            steps {
+                sh 'docker images'
+            }
+        }
+
     }
 }
