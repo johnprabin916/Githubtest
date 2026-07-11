@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "johnprabin/githubtest:v1"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -15,21 +19,33 @@ pipeline {
             }
         }
 
-        stage('Remove Old Container') {
+        stage('Docker Login') {
             steps {
-                sh 'docker rm -f githubtest-container || true'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+                                                 usernameVariable: 'DOCKER_USER',
+                                                 passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Tag Image') {
             steps {
-                sh 'docker run -d --name githubtest-container -p 8081:80 githubtest:v1'
+                sh 'docker tag githubtest:v1 $IMAGE_NAME'
             }
         }
 
-        stage('Verify Container') {
+        stage('Push Image') {
             steps {
-                sh 'docker ps'
+                sh 'docker push $IMAGE_NAME'
+            }
+        }
+
+        stage('Verify Images') {
+            steps {
+                sh 'docker images'
             }
         }
     }
