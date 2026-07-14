@@ -48,5 +48,16 @@ pipeline {
                 sh 'docker images'
             }
         }
+
+        stage('Deploy to ECS') {
+            steps {
+                sh '''
+                aws ecs update-service \
+                  --cluster john-cluster \
+                  --service githubtest-service-0mr1yr74 \
+                  --force-new-deployment
+                '''
+            }
+        }
     }
 }
